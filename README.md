@@ -10,5 +10,15 @@ This interactive Chatbot project integrates several advanced technologies to del
 
 - Clone the repository:
   ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/EchoEvelyn/Chatbot.git
+- Navigate to the project directory:
+  ```bash
+  cd Chatbot
+- Create a virtual environment:
+  ```bash
+  python -m venv .venv
+  .\.venv\Scripts\activate
+- Install the required dependencies in the virtual environment
+
+That's it! You can run the code locally~ 🥳
+  
