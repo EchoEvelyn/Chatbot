@@ -24,4 +24,5 @@ That's it! You can run the code locally~ 🥳
 
 ## Demo
 
-<img src="images/1.png" alt="step 1" width="700"/>
+<img src="images/1.png" alt="step 1" width="750"/>
+<img src="images/2.png" alt="step 2" width="750"/>
