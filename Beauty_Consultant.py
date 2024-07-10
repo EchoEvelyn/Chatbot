@@ -7,29 +7,24 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders.csv_loader import CSVLoader
-# from langchain.document_loaders import PyPDFLoader
 from langchain.vectorstores import FAISS
-
-import pandas as pd
 from PIL import Image
 import openai
-
 import os
-os.environ["OPENAI_API_KEY"] = "sk-proj-cU24cPDmI3NA5AMpMObVT3BlbkFJYy1add2zcoLAX2FnRBjO"
-openai.api_key  = os.getenv('OPENAI_API_KEY')
+import pandas as pd
+# import plotly.express as px
 
-image = Image.open('background.jpeg')
+image = Image.open('background.jpg')
 st.sidebar.image(image)
 
 st.sidebar.title(
-    'Welcome to Beauty Consultant :kiss: ~'
+    'Welcome to Virtual Reader :memo:'
 )
-st.sidebar.subheader(
-    ":triangular_flag_on_post: How to use?"
-)
-st.sidebar.markdown("- Upload a file")
-st.sidebar.markdown("- Ask questions about the file")
-st.sidebar.markdown("- Add to your shopping cart")
+
+st.sidebar.markdown("""
+                    :triangular_flag_on_post: Enter your API Key and upload your file~
+                    Feel free to ask me any questions about the file~
+                    """)
 
 st.sidebar.write("---")
 
@@ -42,12 +37,11 @@ api_key_input = st.sidebar.text_input(
 
 st.session_state["OPENAI_API_KEY"] = api_key_input
 
-uploaded_file = st.file_uploader(label=" ", type="csv")
-
 if not api_key_input:
-    st.info("Please add your OpenAI API key to continue.")
+    st.info("Please enter a valid API key to continue.")
     st.stop()
 else:
+    uploaded_file = st.file_uploader(label=" ", type="csv")
 
     if uploaded_file :
 
@@ -58,6 +52,7 @@ else:
         try:
             loader = CSVLoader(file_path=tmp_file_path, encoding='unicode_escape')
             data = loader.load()
+            df = pd.read_csv(tmp_file_path, encoding='unicode_escape')
         finally:
             os.remove(tmp_file_path)
 
@@ -69,12 +64,7 @@ else:
             retriever=vectors.as_retriever()
         )
 
-        tab1, tab2, tab3 = st.tabs(["💬Conversation", "📔Data", "🛒Shopping Cart"])
-
         def conversational_chat(query):
-            if "add" in query:
-                with tab3:
-                    st.text("")
             result = chain({"question": query, "chat_history": st.session_state['history']})
             st.session_state['history'].append((query, result["answer"]))
             return result["answer"]
@@ -88,19 +78,6 @@ else:
             )
             return response.choices[0].message["content"]
 
-
-        def extract_products(response): # extract product names from a response
-            prompt = f"""
-            Extract the brands and names of makeup products from the below paragraph and present them with comma separation.\
-            If there is no product extracted, return no product recommended.\
-            If there is product extracted, no need to type words like product recommended.
-
-            paragraph: ```{response}```
-            """
-            extraction = get_completion(prompt)
-            return extraction
-
-
         if 'input_query' not in st.session_state: # user's input
             st.session_state['input_query'] = ["Hey ! 👋"]
 
@@ -110,37 +87,20 @@ else:
         if 'history' not in st.session_state: # overal conversation
             st.session_state['history'] = []
 
-        if 'shopping_cart' not in st.session_state:
-            st.session_state['shopping_cart'] = []
+        tab1, tab2 = st.tabs(['💬Conversation', "📔Data"])
 
         with tab1:
-            st.header('Chatbot')
-            st.markdown(":pushpin: Add feature:")
-            st.markdown("- If you want to add specific products from the recommendations, type: add + names")
-            st.markdown("- If you want to add all products in the recommendations, type: add")
             #container for the chat history
             response_container = st.container()
             #container for the user's text input
             input_container = st.container()
-
             with input_container:
                 with st.form(key='my_form', clear_on_submit=True):
                     user_input = st.text_input("Question:", placeholder="What questions do you have ?", key='input')
                     submit_button = st.form_submit_button(label='Send')
 
                 if submit_button and user_input:
-                    index = user_input.casefold().find('add')
-                    if index != -1:
-                        w_nw_products = extract_products(user_input)
-                        index_2 = w_nw_products.casefold().find('no product recommended')
-                        if index_2 != -1:
-                            product_list = extract_products(st.session_state['response'][-1])
-                        else:
-                            product_list = extract_products(user_input)
-                        st.session_state['shopping_cart'].append(product_list)
-                        output = "Great! The item will be shown once you go to the shopping cart."
-                    else:
-                        output = conversational_chat(user_input)
+                    output = conversational_chat(user_input)
                     st.session_state['input_query'].append(user_input)
                     st.session_state['response'].append(output)
 
@@ -150,26 +110,28 @@ else:
                         message(st.session_state["input_query"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
                         message(st.session_state["response"][i], key=str(i), avatar_style="thumbs")
 
-        with tab2:
-            st.header('Data Statistics')
-            df = pd.read_csv(uploaded_file)
-            st.write(df.describe())
-            st.header('Data Header')
-            st.write(df.head())
+        # with tab2:
+        #     st.write(df.sample(10))
 
-        with tab3:
-            st.header('Your Shopping Cart')
-            clear_button = st.button("Clear All")
-            placeholder = st.empty()
-            with placeholder.container():
-                for each in st.session_state.shopping_cart:
-                    index = each.find(',')
-                    if index != -1:
-                        split = each.split(",")
-                        for i in split:
-                            st.markdown("- " + i + "\n")
-                    else:
-                        st.markdown("- " + each + "\n")
-            if clear_button:
-                placeholder.empty()
-                st.session_state.shopping_cart = []
+        #     st.write("### Plot Customization")
+
+        #     columns = df.columns.tolist()
+        #     x_axis = st.selectbox("X-Axis:", [None] + columns)
+        #     y_axis = st.selectbox("Y-Axis:", [None] + columns)
+        #     color = st.selectbox("Color:", [None] + columns)
+
+        #     plot_title = st.text_input("Plot Title:", value=f"{x_axis} vs {y_axis}")
+        #     plot_type = st.selectbox("Plot Type:", ['scatter', 'line', 'bar'])
+
+        #     # Main panel for the plot
+        #     if x_axis and y_axis:
+        #         if plot_type == 'scatter':
+        #             fig = px.scatter(df, x=x_axis, y=y_axis, color=color, title=plot_title)
+        #         elif plot_type == 'line':
+        #             fig = px.line(df, x=x_axis, y=y_axis, color=color, title=plot_title)
+        #         elif plot_type == 'bar':
+        #             fig = px.bar(df, x=x_axis, y=y_axis, color=color, title=plot_title)
+
+        #         st.plotly_chart(fig)
+        #     else:
+        #         st.write("Please select both X and Y axis columns.")
