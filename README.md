@@ -24,5 +24,4 @@ That's it! You can run the code locally~ 🥳
 
 ## Demo
 
-![Step 1](images/1.png)
-![Step 2](images/2.png)
+<img src="images/1" alt="step 1" width="500"/>
