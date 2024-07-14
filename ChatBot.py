@@ -35,6 +35,7 @@ api_key_input = st.sidebar.text_input(
 )
 
 st.session_state["OPENAI_API_KEY"] = api_key_input
+os.environ["OPENAI_API_KEY"] = api_key_input
 
 if not api_key_input:
     st.info("Please enter a valid API key to continue.")
@@ -81,33 +82,33 @@ else:
             st.session_state['input_query'] = ["Hey ! 👋"]
 
         if 'response' not in st.session_state: # chatbot's response
-            st.session_state['response'] = ["Hi, I'm your beauty consultant. How can I help you today?"]
+            st.session_state['response'] = ["Hi~ How can I help you today?"]
 
         if 'history' not in st.session_state: # overal conversation
             st.session_state['history'] = []
 
-        tab1, tab2 = st.tabs(['💬Conversation', "📔Data"])
+        # tab1 = st.tabs('💬Conversation')
 
-        with tab1:
-            #container for the chat history
-            response_container = st.container()
-            #container for the user's text input
-            input_container = st.container()
-            with input_container:
-                with st.form(key='my_form', clear_on_submit=True):
-                    user_input = st.text_input("Question:", placeholder="What questions do you have ?", key='input')
-                    submit_button = st.form_submit_button(label='Send')
+        # with tab1:
+        #container for the chat history
+        response_container = st.container()
+        #container for the user's text input
+        input_container = st.container()
+        with input_container:
+            with st.form(key='my_form', clear_on_submit=True):
+                user_input = st.text_input("Question:", placeholder="What questions do you have ?", key='input')
+                submit_button = st.form_submit_button(label='Send')
 
-                if submit_button and user_input:
-                    output = conversational_chat(user_input)
-                    st.session_state['input_query'].append(user_input)
-                    st.session_state['response'].append(output)
+            if submit_button and user_input:
+                output = conversational_chat(user_input)
+                st.session_state['input_query'].append(user_input)
+                st.session_state['response'].append(output)
 
-            if st.session_state['response']:
-                with response_container:
-                    for i in range(len(st.session_state['response'])):
-                        message(st.session_state["input_query"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
-                        message(st.session_state["response"][i], key=str(i), avatar_style="thumbs")
+        if st.session_state['response']:
+            with response_container:
+                for i in range(len(st.session_state['response'])):
+                    message(st.session_state["input_query"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
+                    message(st.session_state["response"][i], key=str(i), avatar_style="thumbs")
 
         # with tab2:
         #     st.write(df.sample(10))
