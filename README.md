@@ -26,3 +26,5 @@ That's it! You can run the code locally~ 🥳
 
 <img src="images/1.png" alt="step 1" width="750"/>
 <img src="images/2.png" alt="step 2" width="750"/>
+<img src="images/3.png" alt="step 3" width="750"/>
+<img src="images/4.png" alt="step 4" width="750"/>
